@@ -109,7 +109,7 @@ void i2c_write(char i2c_dev_addr, char register_pointer, char data_MSB, char dat
 //
 //
 // ---------------------------------------------------------------------------------------------------
-void tec_read(void)
+void *tec_read_thread(void *arg)
 {
 
   int i = 0, j = 0;
@@ -161,32 +161,35 @@ void tec_read(void)
   unsigned char msg_t[] = "TEC:T?\nTEC:ITE?\nLOCAL\n";
 
   write(serial_port, msg_t, sizeof(msg_t));
+  usleep(500000);
   read(serial_port, &read_buf_t, sizeof(read_buf_t));
 
-  if(strlen(read_buf_t) != 13)
-    return;                     // Если ответ не полный, прервать.
-
-  while (strchr("\t\n\v\f\r ", read_buf_t[i]) == NULL)
+  if((strlen(read_buf_t) >= 12) || (strlen(read_buf_t) <= 15))  // Если ответ не полный, прервать.
   {
-    if(strchr(".", read_buf_t[i]) != NULL)
-      read_buf_t[i] = Settings.csv_dots[0];
-    tec_massive[0][i] = read_buf_t[i];
-    i++;
-  }
-  tec_massive[0][i] = '\0';
-  i += 2;
-  while (strchr("\t\n\v\f\r ", read_buf_t[i]) == NULL)
-  {
-    if(strchr(".", read_buf_t[i]) != NULL)
-      read_buf_t[i] = Settings.csv_dots[0];
-    tec_massive[1][j] = read_buf_t[i];
-    i++;
-    j++;
-  }
 
-  tec_massive[1][j] = '\0';
+    while (strchr("\t\n\v\f\r ", read_buf_t[i]) == NULL)
+    {
+      if(strchr(".", read_buf_t[i]) != NULL)
+        read_buf_t[i] = Settings.csv_dots[0];
+      tec_massive[0][i] = read_buf_t[i];
+      i++;
+    }
+    tec_massive[0][i] = '\0';
+    i += 2;
+    while (strchr("\t\n\v\f\r ", read_buf_t[i]) == NULL)
+    {
+      if(strchr(".", read_buf_t[i]) != NULL)
+        read_buf_t[i] = Settings.csv_dots[0];
+      tec_massive[1][j] = read_buf_t[i];
+      i++;
+      j++;
+    }
+
+    tec_massive[1][j] = '\0';
+  }
   close(serial_port);
-  return;
+  pthread_exit(NULL);
+
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -627,6 +630,7 @@ int main(int argc, char **argv)
   clock_gettime(CLOCK_REALTIME, &start);
   clock_gettime(CLOCK_REALTIME, &start_tec);
   clock_gettime(CLOCK_REALTIME, &display_start);
+  pthread_create(&p_tec_read_thread, NULL, tec_read_thread, (void *) ((intptr_t) i));   // запуск чтения данных с TEC
 // Read data ---------------------------------------------------
   while (exit_code == 0)
   {
@@ -720,7 +724,6 @@ int main(int argc, char **argv)
         {
           temperature_sensors[i].tmp117_last_read_time = accum;
           read_temp(i, temperature_sensors[i].i2c_address);     // Read TMP117
-          tec_read();           // read Arroyo data
 
         }
     }
@@ -730,7 +733,12 @@ int main(int argc, char **argv)
     if((accum - tec_last_read_time) > 1)        // зедержка 1 сек
     {
       tec_last_read_time = accum;
-      tec_read();               // read Arroyo data
+      status = pthread_join(p_tec_read_thread, (void **) &status_addr);
+      if(status == SUCCESS)
+      {
+        pthread_create(&p_tec_read_thread, NULL, tec_read_thread, (void *) ((intptr_t) i));     // запуск чтения данных с TEC
+      }
+
     }
     // Draw log table and save CSV
 

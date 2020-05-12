@@ -88,6 +88,7 @@ const char *Arroyo_5305_TECSource_port;
 struct termios tty;
 char tec_massive[2][RESPONSE_LEN];
 double tec_last_read_time;
+pthread_t p_tec_read_thread;
 
 time_t rawtime;
 struct tm *timeinfo;
