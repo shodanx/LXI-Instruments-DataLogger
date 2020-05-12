@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <termios.h>
 #include <stdlib.h>
 #include <libconfig.h>
 #include <string.h>
@@ -81,6 +83,12 @@ SettingsDef Settings;
 ChannelsDef Channels;
 temp_sensorsDef temperature_sensors[4];
 const char *i2c_file_name;
+
+const char *Arroyo_5305_TECSource_port;
+struct termios tty;
+char tec_massive[2][RESPONSE_LEN];
+double tec_last_read_time;
+
 time_t rawtime;
 struct tm *timeinfo;
 char time_buffer[80];
