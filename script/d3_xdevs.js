@@ -212,8 +212,8 @@ d3.csv(logname)
         d.ch12 = +(d.val12 * 1);
         d.ch13 = +(d.val13 * 1);
         d.ch14 = +(d.val14 * 1);
-        d.ch15 = +(d.val15 * 1);
-        d.ch16 = +(d.val16 * 1);
+        d.ch15 = +(d.tecite * 1);
+        d.ch16 = +(d.tect * 1);
 
         d.ch17 = +(d.temp1 * 1);
         d.ch18 = +(d.temp2 * 1);
@@ -241,10 +241,13 @@ curveArray.forEach(function(daCurve,i) {
 
 eval(' var yAxis_w_'    + daCurve.channel +' = d3.scaleLinear().range([height, 0])');
 
-if(daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||daCurve.channel=='ch20'){
-    eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(function(d) {return d3.format(\'.2f\')(d) + \'°C\'})');
+if(daCurve.channel=='ch16'||daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||daCurve.channel=='ch20'){
+    eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(function(d) {return d3.format(\'.3f\')(d) + \'°C\'})');
 } else {
     if(daCurve.axis_is_ppm==0){
+	if(daCurve.channel=='ch15'){
+	    eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(function(d) {return d3.format(\'.2f\')(d) + \'A\'})');
+	} else 
 	eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+')');
     } else {
         eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(function(d) {return d3.format(\'.2f\')(((d/d3.median(data, function(d) { return (d[daCurve.channel]);} ).toPrecision(7))-1)*1E6) + \' ppm\'})');
@@ -332,6 +335,24 @@ if(daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||da
         .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(3) + "°C " +
                                    "σ=" + (d3.deviation(data, function(d) { return (d[daCurve.channel]);} )*1e3).toFixed(3) + "m°C " +
                                    "Peak-to-peak: " + (max-min).toFixed(3) + "°C");
+} else  if(daCurve.channel=='ch16'){
+    svg4.append("text")      // text label for the x axis
+        .attr("x", 50 )
+        .attr("y",  height + margin.top + margin.bottom+ (20 * i) )
+        .style("text-anchor", "left")
+        .style("fill", function() {return daCurve.color = color(daCurve.curveTitle); })
+        .style("font-size","18px")
+        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(2) + "°C " +
+                                   "Peak-to-peak: " + (max-min).toFixed(2) + "°C");
+} else if(daCurve.channel=='ch15'){
+    svg4.append("text")      // text label for the x axis
+        .attr("x", 50 )
+        .attr("y",  height + margin.top + margin.bottom+ (20 * i) )
+        .style("text-anchor", "left")
+        .style("fill", function() {return daCurve.color = color(daCurve.curveTitle); })
+        .style("font-size","18px")
+        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(2) + "A " +
+                                   "Peak-to-peak: " + (max-min).toFixed(2) + "A");
 } else {
     svg4.append("text")      // text label for the x axis
         .attr("x", 50 )
@@ -339,7 +360,7 @@ if(daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||da
         .style("text-anchor", "left")
         .style("fill", function() {return daCurve.color = color(daCurve.curveTitle); })
         .style("font-size","18px")
-        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(8) + " " +
+        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(17) + " " +
                                    "σ=" + (d3.deviation(data, function(d) { return (d[daCurve.channel]);} )*1e6).toFixed(3) + "u " +
                                    "Peak-to-peak: " + ((diff/(((max+min)/2)/1E6))).toFixed(3) + "ppm");
 }
@@ -359,7 +380,7 @@ svg4.append("text")      // text label for the x axis
         .style("text-anchor", "left")
         .style("fill","#035")
         .style("font-size","24px")
-        .text(logname+"      SMPL:" + cnt + " AVG:"+avgSamples+"      ΔT:" + tspan.toFixed(2) + "°C");
+        .text(logname+"      SMPL:" + cnt + " AVG:"+avgSamples+"      ΔT:" + tspan.toFixed(3) + "°C");
 
 svg4.append("text")      // text label for the x axis
         .attr("x", -50 )

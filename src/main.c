@@ -338,6 +338,13 @@ void init_config()
   fprintf(js_file_descriptor, "var axis_tick = 40;   // Tick of Y axis       \n");
   fprintf(js_file_descriptor, "                                              \n");
   fprintf(js_file_descriptor, "var curveArray = [                            \n");
+
+  fprintf(js_file_descriptor,
+          "    {\"curveTitle\":\"Arroyo TEC current\",         \"channel\":\"ch15\",       \"offset\":0,             \"scale\":5,      \"group\":0,      \"tspan\":0,      \"axis_is_ppm\":0}, \n");
+  fprintf(js_file_descriptor,
+          "    {\"curveTitle\":\"Arroyo TEC  temp\",           \"channel\":\"ch16\",       \"offset\":0,             \"scale\":5,      \"group\":0,      \"tspan\":1,      \"axis_is_ppm\":0}, \n");
+
+
   if(!config_lookup_string(&cfg, "csv_dots", &Settings.csv_dots))
     Settings.csv_dots = ".";
   if(!config_lookup_string(&cfg, "csv_delimeter", &Settings.csv_delimeter))
@@ -371,7 +378,8 @@ void init_config()
           fprintf(js_file_descriptor, "    {\"curveTitle\":\"%s\",		\"channel\":\"ch%i\",	\"offset\":0,		\"scale\":100,	\"group\":0,	\"tspan\":0,	\"axis_is_ppm\":0}, \n",
                   temperature_sensors[i].device_temp_name, i + 17);
         } else
-          fprintf(js_file_descriptor, "    {\"curveTitle\":\"%s\",		\"channel\":\"ch%i\",	\"offset\":0,		\"scale\":100,	\"group\":0,	\"tspan\":1,	\"axis_is_ppm\":0}, \n",
+//          fprintf(js_file_descriptor, "    {\"curveTitle\":\"%s\",            \"channel\":\"ch%i\",   \"offset\":0,           \"scale\":100,  \"group\":0,    \"tspan\":1,    \"axis_is_ppm\":0}, \n",
+          fprintf(js_file_descriptor, "    {\"curveTitle\":\"%s\",		\"channel\":\"ch%i\",	\"offset\":0,		\"scale\":100,	\"group\":0,	\"tspan\":0,	\"axis_is_ppm\":0}, \n",
                   temperature_sensors[i].device_temp_name, i + 17);
       }
 
