@@ -69,8 +69,8 @@ Order that board with Flex option only!!!
 
 Added support load current and temperature data from Arroyo Instruments TECSource series. (tested with TECSource 5305)
 
-Connect TECSource via USB and use "Arroyo_5305_TECSource_port" config variable for configure port path to virtual USB.
-Data refreshed every 1 second. After reading data TECSource automatically back to "LOCAL" mode and unlock knob.
+Connect TECSource via USB and use "Arroyo_5305_TECSource_port" config variable to configure port path to virtual USB.
+Data refreshed every 1 second. After each reading of data from TECSource, it automatically back to "LOCAL" mode and unlock knob.
 
 ## Experimental D3 web graph feature.
 
