@@ -65,6 +65,13 @@ FlexPCB can be ordered here:
 
 Order that board with Flex option only!!!
 
+## Arroyo TECSource support
+
+Added support load current and temperature data from Arroyo Instruments TECSource series. (tested with TECSource 5305)
+
+Connect TECSource via USB and use "Arroyo_5305_TECSource_port" config variable for configure port path to virtual USB.
+Data refreshed every 1 second. After reading data TECSource automatically back to "LOCAL" mode and unlock knob.
+
 ## Experimental D3 web graph feature.
 
 You can install NGINX webserver for download CSV files and draw graph.
