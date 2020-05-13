@@ -55,6 +55,8 @@ void *window_refresh_thread(void *arg)
 
   wrefresh(channels_win);
   wrefresh(log_win);
+  wrefresh(legend_win);
+  wrefresh(help_win);
   pthread_exit(NULL);
 }
 
@@ -536,7 +538,7 @@ void draw_info_win()
       wprintw(legend_win, "Temp%i    ", i);
       wmove(channels_win, i + 2, 1);
       wprintw(channels_win, "T%-6i %-40s", i, temperature_sensors[i].device_temp_name);
-      wrefresh(channels_win);
+//      wrefresh(channels_win);
     }
   }
 
