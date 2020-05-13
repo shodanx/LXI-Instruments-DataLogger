@@ -50,6 +50,20 @@ void *measurement_thread(void *arg)
 //
 //
 // ---------------------------------------------------------------------------------------------------
+void *window_refresh_thread(void *arg)
+{
+
+  wrefresh(channels_win);
+  wrefresh(log_win);
+  pthread_exit(NULL);
+}
+
+
+// ---------------------------------------------------------------------------------------------------
+//
+//
+//
+// ---------------------------------------------------------------------------------------------------
 void send_command_to_instrument(int chan, const char *arg)
 {
   extern ChannelsDef Channels;
@@ -255,24 +269,40 @@ void configure_tmp117(int addr, int config)
 //
 //
 // ---------------------------------------------------------------------------------------------------
-void read_temp(int chan, int addr)
+void *read_temp_thread(void *arg)
 {
+
   float result;
-  i2c_fd = open(i2c_file_name, O_RDWR);
-  if(i2c_fd < 0)
+  int i;
+  double accum;
+
+  clock_gettime(CLOCK_REALTIME, &stop_i2c);     // Fix clock
+  accum = (stop_i2c.tv_sec - start_i2c.tv_sec) + (stop_i2c.tv_nsec - start_i2c.tv_nsec) / 1E9;
+  for (i = 0; i < channel_count_temp; ++i)
   {
-    perror("i2c: Failed to open i2c device");
-    return;
-  }
+    if(temperature_sensors[i].i2c_address > 0)
+      if(((accum - temperature_sensors[i].tmp117_last_read_time) > temperature_sensors[i].delay) || temperature_sensors[i].tmp117_last_read_time == 0)
+      {
+        temperature_sensors[i].tmp117_last_read_time = accum;
+
+        i2c_fd = open(i2c_file_name, O_RDWR);
+        if(i2c_fd < 0)
+        {
+          perror("i2c: Failed to open i2c device");
+          pthread_exit(NULL);
+        }
 
 
-  result = i2c_read_temp(addr & 0xFF, 0x00);    // Read temperature register
-  close(i2c_fd);
-  result *= 0.0078125;
-  if(result > -256)
-  {
-    temperature_sensors[chan].temperature = result;
+        result = i2c_read_temp(temperature_sensors[i].i2c_address & 0xFF, 0x00);        // Read temperature register
+        close(i2c_fd);
+        result *= 0.0078125;
+        if(result > -256)
+        {
+          temperature_sensors[i].temperature = result;
+        }
+      }
   }
+  pthread_exit(NULL);
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -566,7 +596,6 @@ int main(int argc, char **argv)
 {
   int i, k;
   int status_addr, status;
-  struct timespec start, stop, start_tec, stop_tec, display_start, display_stop;
   double accum;
   char time_in_char[32], temp_in_char[32];
   int time_in_char_pos = 0, temp_in_char_pos = 0;
@@ -637,8 +666,16 @@ int main(int argc, char **argv)
 // Start time measurement
   clock_gettime(CLOCK_REALTIME, &start);
   clock_gettime(CLOCK_REALTIME, &start_tec);
+  clock_gettime(CLOCK_REALTIME, &start_i2c);
   clock_gettime(CLOCK_REALTIME, &display_start);
+
+// -------------------------------------------------------------
+// Start threads
+  pthread_create(&p_read_temp_thread, NULL, read_temp_thread, (void *) ((intptr_t) i)); // запуск чтения данных с I2C
   pthread_create(&p_tec_read_thread, NULL, tec_read_thread, (void *) ((intptr_t) i));   // запуск чтения данных с TEC
+  pthread_create(&p_window_refresh_thread, NULL, window_refresh_thread, (void *) ((intptr_t) i));
+
+
 // Read data ---------------------------------------------------
   while (exit_code == 0)
   {
@@ -686,10 +723,16 @@ int main(int argc, char **argv)
         sleep(1);
       break;
     case 'r':
+
+//  log_win = newwin(term_y - (total_channels_count + 3) - 1 - 1 - 1, term_x, total_channels_count + 3 + 1 + 1, 0);
+//  scrollok(log_win, TRUE);
+//  legend_win = newwin(term_y - (total_channels_count + 3) - 1 - 1 - 1, term_x, total_channels_count + 3 + 1, 0);
+
+
       getmaxyx(stdscr, term_y, term_x);
-      wresize(log_win, term_y - (total_channels_count + 3) - 1 - 1, term_x);
+      wresize(log_win, term_y - (total_channels_count + 3) - 1 - 1 - 1, term_x);
       wresize(legend_win, 1, term_x);
-      wresize(channels_win, total_channels_count + 3, 85);
+      wresize(channels_win, total_channels_count + 3 + 1, 85);
       mvwin(help_win, term_y - 1, 0);
       wresize(help_win, 1, term_x);
       draw_info_win();
@@ -725,15 +768,15 @@ int main(int argc, char **argv)
     // Calculate time
     clock_gettime(CLOCK_REALTIME, &stop);       // Fix clock
     accum = (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / 1E9;
-    for (i = 0; i < channel_count_temp; ++i)
+    if((accum - temperature_last_read_time) > 1)        // зедержка 1 сек
     {
-      if(temperature_sensors[i].i2c_address > 0)
-        if(((accum - temperature_sensors[i].tmp117_last_read_time) > temperature_sensors[i].delay) || temperature_sensors[i].tmp117_last_read_time == 0)
-        {
-          temperature_sensors[i].tmp117_last_read_time = accum;
-          read_temp(i, temperature_sensors[i].i2c_address);     // Read TMP117
+      temperature_last_read_time = accum;
+      status = pthread_join(p_read_temp_thread, (void **) &status_addr);
+      if(status == SUCCESS)
+      {
+        pthread_create(&p_read_temp_thread, NULL, read_temp_thread, (void *) ((intptr_t) i));   // запуск чтения данных с I2C
+      }
 
-        }
     }
 
     clock_gettime(CLOCK_REALTIME, &stop_tec);   // Fix clock
@@ -839,8 +882,14 @@ int main(int argc, char **argv)
     accum = ((display_stop.tv_sec - display_start.tv_sec) + (display_stop.tv_nsec - display_start.tv_nsec) / 1E9) * 1000;
     if(accum >= REFRESH_SCREEN_TIMEOUT_MS)
     {
-      wrefresh(channels_win);
-      wrefresh(log_win);
+
+      status = pthread_join(p_window_refresh_thread, (void **) &status_addr);
+      if(status == SUCCESS)
+      {
+        pthread_create(&p_window_refresh_thread, NULL, window_refresh_thread, (void *) ((intptr_t) i)); // запуск чтения данных с TEC
+      }
+//      wrefresh(channels_win);
+//      wrefresh(log_win);
       clock_gettime(CLOCK_REALTIME, &display_start);
     }
     // ---------------------------------------------------------

@@ -90,6 +90,11 @@ char tec_massive[2][RESPONSE_LEN];
 double tec_last_read_time;
 pthread_t p_tec_read_thread;
 
+pthread_t p_window_refresh_thread;
+
+struct timespec start, stop, start_i2c, stop_i2c, start_tec, stop_tec, display_start, display_stop;
+double temperature_last_read_time;
+
 time_t rawtime;
 struct tm *timeinfo;
 char time_buffer[80];
@@ -102,7 +107,7 @@ int exit_code = 0;
 int channel_count_temp = 0;
 int total_channels_count = 0;
 int total_temp_count = 0;
-
+pthread_t p_read_temp_thread;
 
 
 void *measurement_thread(void *arg);
