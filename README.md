@@ -38,7 +38,7 @@ Press 'space' for pause measurements, or press 'q' for close application.
 
 Measurements data saved into csv_save_dir. CSV file name generated automatically as current date and time.
 
-Into 'channels' config section you can configure up to 16 different instruments for paralells measurements. Each instruments can be configured with different init-string, timeout, read-command, and connection settings.
+Into 'channels' config section you can configure up to 14 different instruments for paralells measurements. Each instruments can be configured with different init-string, timeout, read-command, and connection settings.
 
 Screen update rate slowdown to 100 ms refresh interval, for low CPU usage on high-speed measurements(NPLC lower 1).
 
