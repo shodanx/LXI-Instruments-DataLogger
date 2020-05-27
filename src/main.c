@@ -12,7 +12,8 @@ void *measurement_thread(void *arg)
   int myid = (int) ((intptr_t) arg);
   unsigned long i;
   char response[RESPONSE_LEN];
-
+  char bad_string1[RESPONSE_LEN] = "9.91E37";
+  char bad_string2[RESPONSE_LEN] = "9,91E37";
 
   int counter, start_num;
   if(Channels.sub_channels_count[myid] == 0)
@@ -29,19 +30,20 @@ void *measurement_thread(void *arg)
     lxi_receive(Channels.device[myid], response, sizeof(response), Channels.Timeout[myid]);     // Wait for response
 
     i = 0;
-
-    while (strchr("\t\n\v\f\r ", response[i]) == NULL)
+    if((strncmp(response, bad_string1, 7) != 0) && (strncmp(response, bad_string2, 7) != 0)) // Fix B2985A humidity sensor error
     {
-      if(strchr(".", response[i]) != NULL)
-        response[i] = Settings.csv_dots[0];
-      response_massive[myid][counter][i] = response[i];
-      i++;
+      while (strchr("\t\n\v\f\r ", response[i]) == NULL)
+      {
+        if(strchr(".", response[i]) != NULL)
+          response[i] = Settings.csv_dots[0];
+        response_massive[myid][counter][i] = response[i];
+        i++;
+      }
+
+      response[i] = '\0';
+      response_massive[myid][counter][i] = '\0';
     }
-
-    response[i] = '\0';
-    response_massive[myid][counter][i] = '\0';
   }
-
   pthread_exit(NULL);
 }
 
