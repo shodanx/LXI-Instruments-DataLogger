@@ -248,7 +248,11 @@ if(daCurve.channel=='ch16'||daCurve.channel=='ch17'||daCurve.channel=='ch18'||da
 	if(daCurve.channel=='ch15'){
 	    eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(function(d) {return d3.format(\'.2f\')(d) + \'A\'})');
 	} else 
-	eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+')');
+	    if(daCurve.axis_is_exponent==0){
+		eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+')');
+	    }else{
+		eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(d3.format(".4e"))');
+	    }
     } else {
         eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(function(d) {return d3.format(\'.2f\')(((d/d3.median(data, function(d) { return (d[daCurve.channel]);} ).toPrecision(7))-1)*1E6) + \' ppm\'})');
     }
