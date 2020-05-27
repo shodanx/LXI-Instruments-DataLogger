@@ -374,9 +374,9 @@ void init_config()
   fprintf(js_file_descriptor, "var curveArray = [                            \n");
 
   fprintf(js_file_descriptor,
-          "    {\"curveTitle\":\"Arroyo TEC current\",         \"channel\":\"ch15\",       \"offset\":0,             \"scale\":5,      \"group\":0,      \"tspan\":0,      \"axis_is_ppm\":0},	\"axis_is_exponent\":0}, \n");
+          "    {\"curveTitle\":\"Arroyo TEC current\",         \"channel\":\"ch15\",       \"offset\":0,             \"scale\":5,      \"group\":0,      \"tspan\":0,      \"axis_is_ppm\":0,	\"axis_is_exponent\":0}, \n");
   fprintf(js_file_descriptor,
-          "    {\"curveTitle\":\"Arroyo TEC  temp\",           \"channel\":\"ch16\",       \"offset\":0,             \"scale\":5,      \"group\":0,      \"tspan\":1,      \"axis_is_ppm\":0},	\"axis_is_exponent\":0}, \n");
+          "    {\"curveTitle\":\"Arroyo TEC  temp\",           \"channel\":\"ch16\",       \"offset\":0,             \"scale\":5,      \"group\":0,      \"tspan\":1,      \"axis_is_ppm\":0,	\"axis_is_exponent\":0}, \n");
 
 
   if(!config_lookup_string(&cfg, "csv_dots", &Settings.csv_dots))
@@ -414,7 +414,7 @@ void init_config()
                   temperature_sensors[i].device_temp_name, i + 17);
         } else
           fprintf(js_file_descriptor,
-                  "    {\"curveTitle\":\"%s\",		\"channel\":\"ch%i\",	\"offset\":0,		\"scale\":100,	\"group\":0,	\"tspan\":0,	\"axis_is_ppm\":0},	\"axis_is_exponent\":0}, \n",
+                  "    {\"curveTitle\":\"%s\",		\"channel\":\"ch%i\",	\"offset\":0,		\"scale\":100,	\"group\":0,	\"tspan\":0,	\"axis_is_ppm\":0,	\"axis_is_exponent\":0}, \n",
                   temperature_sensors[i].device_temp_name, i + 17);
       }
 
@@ -479,7 +479,7 @@ void init_config()
           chan_count++;
           fprintf(csv_file_descriptor, "val%i%s", chan_count, Settings.csv_delimeter);
           fprintf(js_file_descriptor,
-                  "    {\"curveTitle\":\"%s %s\",		\"channel\":\"ch%i\",	\"offset\":0,		\"scale\":1,	\"group\":0,	\"tspan\":0,	\"axis_is_ppm\":0},	\"axis_is_exponent\":0}, \n",
+                  "    {\"curveTitle\":\"%s %s\",		\"channel\":\"ch%i\",	\"offset\":0,		\"scale\":1,	\"group\":0,	\"tspan\":0,	\"axis_is_ppm\":0,	\"axis_is_exponent\":0}, \n",
                   Channels.Device_name[i][0], Channels.Device_name[i][k + 1], chan_count);
           total_channels_count++;
           k++;
@@ -492,7 +492,7 @@ void init_config()
         total_channels_count++;
         fprintf(csv_file_descriptor, "val%i%s", chan_count, Settings.csv_delimeter);
         fprintf(js_file_descriptor,
-                "    {\"curveTitle\":\"%s\",		\"channel\":\"ch%i\",	\"offset\":0,		\"scale\":1,	\"group\":0,	\"tspan\":0,	\"axis_is_ppm\":0},	\"axis_is_exponent\":0}, \n",
+                "    {\"curveTitle\":\"%s\",		\"channel\":\"ch%i\",	\"offset\":0,		\"scale\":1,	\"group\":0,	\"tspan\":0,	\"axis_is_ppm\":0,	\"axis_is_exponent\":0}, \n",
                 Channels.Device_name[i][0], chan_count);
       }
 //      }
