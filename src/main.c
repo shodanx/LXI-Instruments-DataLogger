@@ -471,7 +471,7 @@ void init_config()
 
   }
 
-  fprintf(csv_file_descriptor, "tect,tecwtt%s", Settings.csv_delimeter);
+  fprintf(csv_file_descriptor, "tect,tecpwr%s", Settings.csv_delimeter);
 
   setting = config_lookup(&cfg, "inventory.channels");
   channel_count = config_setting_length(setting);
@@ -588,7 +588,7 @@ void draw_info_win()
     }
   }
 
-  wprintw(legend_win, "TEC-T  TEC-WTT ");
+  wprintw(legend_win, "TEC-T  TEC-PWR ");
 
   for (i = 0; i < channel_count; ++i)
   {
@@ -873,9 +873,9 @@ int main(int argc, char **argv)
 
     if(Arroyo_5305_TECSource_port != NULL)
     {
-      wprintw(log_win, " %-5s  %7.4f ", tec_massive[0], tec_watt);
+      wprintw(log_win, " %-5s  %7.4f  ", tec_massive[0], tec_watt);
       fprintf(csv_file_descriptor, "%s%s%s%s", tec_massive[0], Settings.csv_delimeter, tec_massive[3], Settings.csv_delimeter);
-      mvwprintw(channels_win, total_temp_count + 2, 1, "TEC     Arroyo                                   T:%-8s       WTT:%7.4f", tec_massive[0], tec_watt);    // Print response
+      mvwprintw(channels_win, total_temp_count + 2, 1, "TEC     Arroyo                                   T:%-8s       PWR:%7.4f", tec_massive[0], tec_watt);    // Print response
     }
     // Wait threads complete
     for (i = 0; i < channel_count; ++i)

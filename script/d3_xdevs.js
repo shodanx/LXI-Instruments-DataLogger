@@ -212,7 +212,7 @@ d3.csv(logname)
         d.ch12 = +(d.val12 * 1);
         d.ch13 = +(d.val13 * 1);
         d.ch14 = +(d.val14 * 1);
-        d.ch15 = +(d.tecwtt * 1);
+        d.ch15 = +(d.tecpwr * 1);
         d.ch16 = +(d.tect * 1);
 
         d.ch17 = +(d.temp1 * 1);
