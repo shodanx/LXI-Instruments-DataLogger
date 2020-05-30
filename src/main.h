@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <termios.h>
 #include <stdlib.h>
+#include <math.h>
 #include <libconfig.h>
 #include <string.h>
 #include <time.h>
@@ -86,7 +87,8 @@ const char *i2c_file_name;
 
 const char *Arroyo_5305_TECSource_port;
 struct termios tty;
-char tec_massive[2][RESPONSE_LEN];
+char tec_massive[4][RESPONSE_LEN];
+double tec_watt;
 double tec_last_read_time;
 pthread_t p_tec_read_thread;
 

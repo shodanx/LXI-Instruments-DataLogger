@@ -212,7 +212,7 @@ d3.csv(logname)
         d.ch12 = +(d.val12 * 1);
         d.ch13 = +(d.val13 * 1);
         d.ch14 = +(d.val14 * 1);
-        d.ch15 = +(d.tecite * 1);
+        d.ch15 = +(d.tecwtt * 1);
         d.ch16 = +(d.tect * 1);
 
         d.ch17 = +(d.temp1 * 1);
@@ -246,7 +246,7 @@ if(daCurve.channel=='ch16'||daCurve.channel=='ch17'||daCurve.channel=='ch18'||da
 } else {
     if(daCurve.axis_is_ppm==0){
 	if(daCurve.channel=='ch15'){
-	    eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(function(d) {return d3.format(\'.2f\')(d) + \'A\'})');
+	    eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(function(d) {return d3.format(\'.4f\')(d) + \'W\'})');
 	} else 
 	    if(daCurve.axis_is_exponent==0){
 		eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+')');
@@ -355,8 +355,8 @@ if(daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||da
         .style("text-anchor", "left")
         .style("fill", function() {return daCurve.color = color(daCurve.curveTitle); })
         .style("font-size","18px")
-        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(2) + "A " +
-                                   "Peak-to-peak: " + (max-min).toFixed(2) + "A");
+        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(2) + "W " +
+                                   "Peak-to-peak: " + (max-min).toFixed(2) + "W");
 } else {
     svg4.append("text")      // text label for the x axis
         .attr("x", 50 )

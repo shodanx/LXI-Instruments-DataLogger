@@ -131,6 +131,7 @@ void *tec_read_thread(void *arg)
 {
 
   int i = 0, j = 0;
+  char tec_tmp1[10], tec_tmp2[10];
 
   int serial_port = open(Arroyo_5305_TECSource_port, O_RDWR);
   memset(&tty, 0, sizeof tty);
@@ -176,16 +177,16 @@ void *tec_read_thread(void *arg)
 
   memset(&read_buf_t, '\0', sizeof(read_buf_t));
 
-  unsigned char msg_t[] = "TEC:T?\nTEC:ITE?\nLOCAL\n";
+  unsigned char msg_t[] = "TEC:T?\nTEC:ITE?\nTEC:V?\nLOCAL\n";
 
   write(serial_port, msg_t, sizeof(msg_t));
-  usleep(500000);
+  usleep(75000);                // wait 75ms
   read(serial_port, &read_buf_t, sizeof(read_buf_t));
 
-  if((strlen(read_buf_t) >= 12) || (strlen(read_buf_t) <= 15))  // Если ответ не полный, прервать.
+//  if((strlen(read_buf_t) >= 12) || (strlen(read_buf_t) <= 15))  // Если ответ не полный, прервать.
   {
 
-    while (strchr("\t\n\v\f\r ", read_buf_t[i]) == NULL)
+    while (strchr("\t\n\v\f\r ", read_buf_t[i]) == NULL)        // TEC tempareture
     {
       if(strchr(".", read_buf_t[i]) != NULL)
         read_buf_t[i] = Settings.csv_dots[0];
@@ -193,17 +194,57 @@ void *tec_read_thread(void *arg)
       i++;
     }
     tec_massive[0][i] = '\0';
+
     i += 2;
-    while (strchr("\t\n\v\f\r ", read_buf_t[i]) == NULL)
+    while (strchr("\t\n\v\f\r ", read_buf_t[i]) == NULL)        // TEC current
     {
-      if(strchr(".", read_buf_t[i]) != NULL)
-        read_buf_t[i] = Settings.csv_dots[0];
       tec_massive[1][j] = read_buf_t[i];
+      tec_tmp1[j] = read_buf_t[i];
+      if(strchr(".", read_buf_t[i]) != NULL)
+      {
+        tec_massive[1][j] = Settings.csv_dots[0];
+        tec_tmp1[j] = ',';
+      }
+
       i++;
       j++;
     }
-
     tec_massive[1][j] = '\0';
+    tec_tmp1[j] = '\0';
+
+    i += 2;
+    j = 0;
+    while (strchr("\t\n\v\f\r ", read_buf_t[i]) == NULL)        // TEC voltage
+    {
+      tec_massive[2][j] = read_buf_t[i];
+      tec_tmp2[j] = read_buf_t[i];
+      if(strchr(".", read_buf_t[i]) != NULL)
+      {
+        tec_massive[2][j] = Settings.csv_dots[0];
+        tec_tmp2[j] = ',';
+      }
+
+      i++;
+      j++;
+    }
+    tec_massive[2][j] = '\0';
+    tec_tmp2[j] = '\0';
+
+    tec_watt = fabs(atof(tec_tmp1)) * atof(tec_tmp2);
+    sprintf(tec_massive[3], "%-7.4f", tec_watt);
+
+    i = 0;
+    while (strchr("\t\n\v\f\r ", tec_massive[3][i]) == NULL)    // TEC watt
+    {
+      if(strchr(",", tec_massive[3][i]) != NULL)
+      {
+        tec_massive[3][i] = Settings.csv_dots[0];
+      }
+      i++;
+    }
+    tec_massive[3][i] = '\0';
+
+
   }
   close(serial_port);
   pthread_exit(NULL);
@@ -374,7 +415,7 @@ void init_config()
   fprintf(js_file_descriptor, "var curveArray = [                            \n");
 
   fprintf(js_file_descriptor,
-          "    {\"curveTitle\":\"Arroyo TEC current\",         \"channel\":\"ch15\",       \"offset\":0,             \"scale\":5,      \"group\":0,      \"tspan\":0,      \"axis_is_ppm\":0,	\"axis_is_exponent\":0}, \n");
+          "    {\"curveTitle\":\"Arroyo TEC power\",         \"channel\":\"ch15\",       \"offset\":0,             \"scale\":5,      \"group\":0,      \"tspan\":0,      \"axis_is_ppm\":0,	\"axis_is_exponent\":0}, \n");
   fprintf(js_file_descriptor,
           "    {\"curveTitle\":\"Arroyo TEC  temp\",           \"channel\":\"ch16\",       \"offset\":0,             \"scale\":5,      \"group\":0,      \"tspan\":1,      \"axis_is_ppm\":0,	\"axis_is_exponent\":0}, \n");
 
@@ -430,7 +471,7 @@ void init_config()
 
   }
 
-  fprintf(csv_file_descriptor, "tect,tecite%s", Settings.csv_delimeter);
+  fprintf(csv_file_descriptor, "tect,tecwtt%s", Settings.csv_delimeter);
 
   setting = config_lookup(&cfg, "inventory.channels");
   channel_count = config_setting_length(setting);
@@ -547,7 +588,7 @@ void draw_info_win()
     }
   }
 
-  wprintw(legend_win, "TEC-T  TEC-ITE ");
+  wprintw(legend_win, "TEC-T  TEC-WTT ");
 
   for (i = 0; i < channel_count; ++i)
   {
@@ -832,9 +873,9 @@ int main(int argc, char **argv)
 
     if(Arroyo_5305_TECSource_port != NULL)
     {
-      wprintw(log_win, " %-5s  %-5s   ", tec_massive[0], tec_massive[1]);
-      fprintf(csv_file_descriptor, "%s%s%s%s", tec_massive[0], Settings.csv_delimeter, tec_massive[1], Settings.csv_delimeter);
-      mvwprintw(channels_win, total_temp_count + 2, 1, "TEC     Arroyo                                   T:%-8s       ITE:%-8s", tec_massive[0], tec_massive[1]);       // Print response
+      wprintw(log_win, " %-5s  %7.4f ", tec_massive[0], tec_watt);
+      fprintf(csv_file_descriptor, "%s%s%s%s", tec_massive[0], Settings.csv_delimeter, tec_massive[3], Settings.csv_delimeter);
+      mvwprintw(channels_win, total_temp_count + 2, 1, "TEC     Arroyo                                   T:%-8s       WTT:%7.4f", tec_massive[0], tec_watt);    // Print response
     }
     // Wait threads complete
     for (i = 0; i < channel_count; ++i)
