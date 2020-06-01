@@ -183,7 +183,7 @@ void *tec_read_thread(void *arg)
   usleep(75000);                // wait 75ms
   read(serial_port, &read_buf_t, sizeof(read_buf_t));
 
-//  if((strlen(read_buf_t) >= 12) || (strlen(read_buf_t) <= 15))  // Если ответ не полный, прервать.
+  if(strlen(read_buf_t) >= 18)  // Если ответ не полный, прервать.
   {
 
     while (strchr("\t\n\v\f\r ", read_buf_t[i]) == NULL)        // TEC tempareture
