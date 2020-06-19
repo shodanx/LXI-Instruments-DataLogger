@@ -379,7 +379,7 @@ void init_config()
     csv_dir = "./";
   // Read Arroyo port
   if(!config_lookup_string(&cfg, "Arroyo_5305_TECSource_port", &Arroyo_5305_TECSource_port))
-    Arroyo_5305_TECSource_port = "";
+    Arroyo_5305_TECSource_port = NULL;
   strftime(time_in_char, sizeof(time_in_char), "%d_%m_%Y_%H:%M:%S", localtime(&tdate));
   csv_file_name[0] = '\0';
   strcat(csv_file_name, csv_dir);
@@ -720,7 +720,8 @@ int main(int argc, char **argv)
 // -------------------------------------------------------------
 // Start threads
   pthread_create(&p_read_temp_thread, NULL, read_temp_thread, (void *) ((intptr_t) i)); // запуск чтения данных с I2C
-  pthread_create(&p_tec_read_thread, NULL, tec_read_thread, (void *) ((intptr_t) i));   // запуск чтения данных с TEC
+  if(Arroyo_5305_TECSource_port != NULL)
+    pthread_create(&p_tec_read_thread, NULL, tec_read_thread, (void *) ((intptr_t) i)); // запуск чтения данных с TEC
   pthread_create(&p_window_refresh_thread, NULL, window_refresh_thread, (void *) ((intptr_t) i));
 
 
@@ -830,15 +831,17 @@ int main(int argc, char **argv)
     clock_gettime(CLOCK_REALTIME, &stop_tec);   // Fix clock
     accum = (stop_tec.tv_sec - start_tec.tv_sec) + (stop_tec.tv_nsec - start_tec.tv_nsec) / 1E9;
     if((accum - tec_last_read_time) > 1)        // зедержка 1 сек
-    {
-      tec_last_read_time = accum;
-      status = pthread_join(p_tec_read_thread, (void **) &status_addr);
-      if(status == SUCCESS)
+      if(Arroyo_5305_TECSource_port != NULL)
       {
-        pthread_create(&p_tec_read_thread, NULL, tec_read_thread, (void *) ((intptr_t) i));     // запуск чтения данных с TEC
-      }
+        tec_last_read_time = accum;
 
-    }
+        status = pthread_join(p_tec_read_thread, (void **) &status_addr);
+        if(status == SUCCESS)
+        {
+          pthread_create(&p_tec_read_thread, NULL, tec_read_thread, (void *) ((intptr_t) i));   // запуск чтения данных с TEC
+        }
+
+      }
     // Draw log table and save CSV
 
     time(&rawtime);
