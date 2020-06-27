@@ -337,7 +337,7 @@ if(daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||da
         .style("fill", function() {return daCurve.color = color(daCurve.curveTitle); })
         .style("font-size","18px")
         .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(3) + "°C " +
-                                   "σ=" + (d3.deviation(data, function(d) { return (d[daCurve.channel]);} )*1e3).toFixed(3) + "m°C " +
+                                   "σ=" + (d3.deviation(data, function(d) { return (d[daCurve.channel]);} )*1e3).toFixed(2) + "m°C " +
                                    "Peak-to-peak: " + (max-min).toFixed(3) + "°C");
 } else  if(daCurve.channel=='ch16'){
     svg4.append("text")      // text label for the x axis
@@ -364,9 +364,11 @@ if(daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||da
         .style("text-anchor", "left")
         .style("fill", function() {return daCurve.color = color(daCurve.curveTitle); })
         .style("font-size","18px")
-        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(17) + " " +
-                                   "σ=" + (d3.deviation(data, function(d) { return (d[daCurve.channel]);} )*1e6).toFixed(3) + "u " +
+        .text(daCurve.curveTitle + " MEDIAN: " + d3.format(".9e")(d3.median(data, function(d) { return (d[daCurve.channel]);} )) + "   " +
+                                   "st.dev=" + (d3.format(".2e")(d3.deviation(data, function(d) { return (d[daCurve.channel]);} ))) + "   " +
                                    "Peak-to-peak: " + ((diff/(((max+min)/2)/1E6))).toFixed(3) + "ppm");
+
+//d3.format(".4e")
 }
 
 eval('svg4.append("g")' +
