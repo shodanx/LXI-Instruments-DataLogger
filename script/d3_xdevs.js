@@ -33,6 +33,8 @@ var ppm_max=0;
 var ppm_min=0;
 var min_max_result=[0,0];
 
+var mouse_click=0;
+
 var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 var tspan = 0;
@@ -251,7 +253,7 @@ if(daCurve.channel=='ch16'||daCurve.channel=='ch17'||daCurve.channel=='ch18'||da
 	    if(daCurve.axis_is_exponent==0){
 		eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+')');
 	    }else{
-		eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(d3.format(".4e"))');
+		eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(d3.format(".6e"))');
 	    }
     } else {
         eval(' var yAxisRight_' + daCurve.channel +' = d3.axisRight(yAxis_w_' + daCurve.channel + ').ticks('+axis_tick+').tickFormat(function(d) {return d3.format(\'.2f\')(((d/d3.median(data, function(d) { return (d[daCurve.channel]);} ).toPrecision(7))-1)*1E6) + \' ppm\'})');
@@ -336,8 +338,8 @@ if(daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||da
         .style("text-anchor", "left")
         .style("fill", function() {return daCurve.color = color(daCurve.curveTitle); })
         .style("font-size","18px")
-        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(3) + "°C " +
-                                   "σ=" + (d3.deviation(data, function(d) { return (d[daCurve.channel]);} )*1e3).toFixed(2) + "m°C " +
+        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(3) + "°C | " +
+                                   "σ=" + (d3.deviation(data, function(d) { return (d[daCurve.channel]);} )*1e3).toFixed(2) + "m°C | " +
                                    "Peak-to-peak: " + (max-min).toFixed(3) + "°C");
 } else  if(daCurve.channel=='ch16'){
     svg4.append("text")      // text label for the x axis
@@ -346,7 +348,7 @@ if(daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||da
         .style("text-anchor", "left")
         .style("fill", function() {return daCurve.color = color(daCurve.curveTitle); })
         .style("font-size","18px")
-        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(2) + "°C " +
+        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(2) + "°C | " +
                                    "Peak-to-peak: " + (max-min).toFixed(2) + "°C");
 } else if(daCurve.channel=='ch15'){
     svg4.append("text")      // text label for the x axis
@@ -355,7 +357,7 @@ if(daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||da
         .style("text-anchor", "left")
         .style("fill", function() {return daCurve.color = color(daCurve.curveTitle); })
         .style("font-size","18px")
-        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(2) + "W " +
+        .text(daCurve.curveTitle + " MEDIAN: " + d3.median(data, function(d) { return (d[daCurve.channel]);} ).toFixed(2) + "W | " +
                                    "Peak-to-peak: " + (max-min).toFixed(2) + "W");
 } else {
     svg4.append("text")      // text label for the x axis
@@ -364,10 +366,10 @@ if(daCurve.channel=='ch17'||daCurve.channel=='ch18'||daCurve.channel=='ch19'||da
         .style("text-anchor", "left")
         .style("fill", function() {return daCurve.color = color(daCurve.curveTitle); })
         .style("font-size","18px")
-        .text(daCurve.curveTitle + " MEDIAN: " + d3.format(".9e")(d3.median(data, function(d) { return (d[daCurve.channel]);} )) + "   " +
-                                   "st.dev=" + (d3.format(".2e")(d3.deviation(data, function(d) { return (d[daCurve.channel]);} ))) + "   " +
-                                   "Peak-to-peak: " + ((diff/(((max+min)/2)/1E6))).toFixed(3) + "ppm");
-
+        .text(daCurve.curveTitle + " MEDIAN: " + d3.format(".9e")(d3.median(data, function(d) { return (d[daCurve.channel]);} )) + " | " +
+                                   "st.dev=" + (d3.format(".2e")(d3.deviation(data, function(d) { return (d[daCurve.channel]);} ))) + " | " +
+                                   "Peak-to-peak: " + (max-min).toFixed(6) + "abs  " + ((diff/(((max+min)/2)/1E6))).toFixed(3) + "ppm | " + 
+                                   "TempCo-PtP: " + ((max-min)/tspan).toFixed(6) + " X/°C");
 //d3.format(".4e")
 }
 
